@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Food Expense Tracker</string>
+
+    <string name="add_new_food_expense">Add New Food Expense</string>
+    <string name="add_expense">Add Expense</string>
+    <string name="food_app_logo">Food App Logo</string>
+    <string name="view_expense_detail">View Detail</string>
+    <string name="expense_transaction_details">Expense Transaction Details</string>
+    <string name="home">Home</string>
+    <string name="profile">Profile</string>
+    <string name="stats">Stats</string>
+    <string name="add">Add</string>
+    <string name="setting">Setting</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="grocery_shopping">Grocery Shopping</string>
+    <string name="detailed_description_of_the_expense_goes_here_it_can_be_multiple_lines_long_and_scrollable">Detailed description of the expense goes here. It can be multiple lines long and scrollable.</string>
+    <string name="expense_detail">Expense Detail</string>
+    <string name="edit_expense">Edit Expense</string>
+    <string name="_2025_10_26">2025-10-26</string>
+    <string name="_0_00">$0.00</string>
+    <string name="expense_name">Expense Name</string>
+    <string name="_45_50">$45.50</string>
+    <string name="view_details">VIEW DETAILS</string>
+    <string name="delete_expense">Delete Expense</string>
+    <string name="expense_category_icon">Expense Category Icon</string>
+    <string name="recent_food_expenses">Recent Food Expenses</string>
+    <string name="_2025_10_27">2025-10-26</string>
+    <string name="_45_70_">$45.70</string>
+    <string name="search_icon_description">Search Icon Description</string>
+    <string name="search_food_expenses">Search Food Expenses...</string>
+
+</resources>
