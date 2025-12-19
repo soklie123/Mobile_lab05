@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="black">#FFFFFFFF</color> <!-- White text -->
-    <color name="white">#FF000000</color> <!-- Black background -->
-    <color name="buttonColor">#FF8C00</color> <!-- Brighter for dark mode -->
-    <color name="buttonTextColor">#000000</color>
-</resources>

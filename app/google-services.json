@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "115252808654",
+    "project_id": "mad-app-week5",
+    "storage_bucket": "mad-app-week5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115252808654:android:cd36959702cec86ae4b99f",
+        "android_client_info": {
+          "package_name": "com.example.expense_tracker_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlL_SiXlabpnzu_S2MZbwfJ_2NG6vK19Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/home_fragment"> <!-- Correct: Must match the menu item ID -->
+
+    <!-- 1. Home Fragment (Single Definition) -->
+    <!-- The android:id MUST match the ID in your bottom_nav_menu.xml -->
+    <fragment
+        android:id="@+id/home_fragment"
+        android:name="com.example.expense_tracker_app.fragments.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home">
+        <!-- Actions FROM HomeFragment go here -->
+        <action
+            android:id="@+id/action_homeFragment_to_expenseDetailFragment"
+            app:destination="@id/expenseDetailFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_addExpenseFragment"
+            app:destination="@id/add_expense_fragment" />
+    </fragment>
+
+    <!-- 2. Add/Edit Expense Fragment (Single Definition) -->
+    <!-- The android:id MUST match the ID in your bottom_nav_menu.xml -->
+    <fragment
+        android:id="@+id/add_expense_fragment"
+        android:name="com.example.expense_tracker_app.fragments.AddExpenseFragment"
+        android:label="fragment_add_expense"
+        tools:layout="@layout/fragment_add_expense" >
+        <!-- Define arguments for editing an expense -->
+        <argument
+            android:name="isEditMode"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <argument
+            android:name="expense_id"
+            app:argType="string"
+            app:nullable="true" />
+        <!-- You can add other arguments like amount, remark, etc. -->
+    </fragment>
+
+    <!-- 3. Profile Fragment -->
+    <!-- The android:id MUST match the ID in your bottom_nav_menu.xml -->
+    <fragment
+        android:id="@+id/profile_fragment"
+        android:name="com.example.expense_tracker_app.fragments.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <!-- 4. Settings Fragment -->
+    <!-- The android:id MUST match the ID in your bottom_nav_menu.xml -->
+    <fragment
+        android:id="@+id/settings_fragment"
+        android:name="com.example.expense_tracker_app.fragments.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <!-- 5. Detail Screen (Not in Bottom Nav) -->
+    <fragment
+        android:id="@+id/expenseDetailFragment"
+        android:name="com.example.expense_tracker_app.fragments.ExpenseDetailFragment"
+        android:label="fragment_expense_detail"
+        tools:layout="@layout/fragment_expense_detail">
+        <!-- Action FROM ExpenseDetailFragment to the edit screen -->
+        <action
+            android:id="@+id/action_expenseDetailFragment_to_addExpenseFragment"
+            app:destination="@id/add_expense_fragment" />
+        <!-- Define the argument needed to show a specific expense -->
+        <argument
+            android:name="expenseId"
+            app:argType="string" />
+    </fragment>
+
+</navigation>

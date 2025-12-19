@@ -1,13 +1,14 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+<resources>
+    <!-- Base theme for app (light & dark via DayNight) -->
     <style name="Base.Theme.Expense_Tracker_App" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-        <item name="colorPrimary">#B89040</item>
+        <!-- Light/Dark colors -->
+        <item name="colorPrimary">#6200EE</item>
         <item name="colorOnPrimary">#FFFFFF</item>
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-
+        <item name="colorSecondary">#03DAC5</item>
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#000000</item>
     </style>
 
-    <style name="Theme.Expense_Tracker_App" parent="Base.Theme.Expense_Tracker_App" />
+    <!-- Main app theme -->
+    <style name="Theme.Expense_Tracker_App" parent="Base.Theme.Expense_Tracker_App"/>
 </resources>

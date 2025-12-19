@@ -20,5 +20,10 @@
         android:title="@string/profile"
         android:icon="@drawable/profile_menu"
         android:enabled="true"/>
+    <item
+    android:id="@+id/settings_fragment"
+    android:title="@string/setting"
+    android:icon="@drawable/ic_settings"
+    android:enabled="true"/>
 
 </menu>

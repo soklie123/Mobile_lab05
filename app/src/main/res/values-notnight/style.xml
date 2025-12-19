@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base theme for light mode -->
+    <style name="Theme.MyApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Surface color (background of cards, input fields, etc.) -->
+        <item name="colorSurface">#FFFFFF</item>
+        <!-- Text/icons on surface -->
+        <item name="colorOnSurface">#000000</item>
+        <!-- Primary color -->
+        <item name="colorPrimary">#6200EE</item>
+        <item name="colorPrimaryVariant">#3700B3</item>
+        <!-- Secondary color -->
+        <item name="colorSecondary">#03DAC5</item>
+    </style>
+</resources>

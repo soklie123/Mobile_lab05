@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- The "app:iconSpaceReversed" attribute has been completely removed from all items -->
+
+    <ListPreference
+        android:key="app_language"
+        android:title="@string/language"
+        android:summary="Choose your language"
+        android:entries="@array/language_entries"
+        android:entryValues="@array/language_values"
+        android:defaultValue="en"
+        app:useSimpleSummaryProvider="true" />
+
+    <ListPreference
+        android:key="app_theme"
+        android:title="Theme"
+        android:summary="Select app color theme"
+        android:entries="@array/theme_entries"
+        android:entryValues="@array/theme_values"
+        android:defaultValue="light"
+        app:useSimpleSummaryProvider="true" />
+
+    <ListPreference
+        android:key="default_reminder_time"
+        android:title="Default Reminder"
+        android:summary="Set reminder time before task deadline"
+        android:entries="@array/reminder_time_entries"
+        android:entryValues="@array/reminder_time_values"
+        android:defaultValue="60"
+        app:useSimpleSummaryProvider="true" />
+
+    <Preference
+        android:key="backup_expenses"
+        android:title="Backup Expense"
+        android:summary="Click a backup your expense to your JSON file"
+        android:defaultValue="false" />
+
+    <Preference
+        android:key="unsynced_tasks"
+        android:title="@string/unsynced_tasks"
+        android:summary="%1$d tasks pending sync"
+        app:useSimpleSummaryProvider="true" />
+
+</PreferenceScreen>

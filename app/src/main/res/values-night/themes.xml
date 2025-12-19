@@ -1,10 +1,13 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+<resources>
+    <!-- Dark theme overrides -->
     <style name="Base.Theme.Expense_Tracker_App" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Dark colors -->
         <item name="colorPrimary">#BB86FC</item>
         <item name="colorOnPrimary">#000000</item>
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="colorSecondary">#03DAC5</item>
+        <item name="colorSurface">#121212</item>
+        <item name="colorOnSurface">#E0E0E0</item>
     </style>
+
+    <style name="Theme.Expense_Tracker_App" parent="Base.Theme.Expense_Tracker_App"/>
 </resources>

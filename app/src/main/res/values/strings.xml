@@ -16,17 +16,49 @@
     <string name="detailed_description_of_the_expense_goes_here_it_can_be_multiple_lines_long_and_scrollable">Detailed description of the expense goes here. It can be multiple lines long and scrollable.</string>
     <string name="expense_detail">Expense Detail</string>
     <string name="edit_expense">Edit Expense</string>
-    <string name="_2025_10_26">2025-10-26</string>
-    <string name="_0_00">$0.00</string>
     <string name="expense_name">Expense Name</string>
-    <string name="_45_50">$45.50</string>
+
     <string name="view_details">VIEW DETAILS</string>
     <string name="delete_expense">Delete Expense</string>
     <string name="expense_category_icon">Expense Category Icon</string>
     <string name="recent_food_expenses">Recent Food Expenses</string>
-    <string name="_2025_10_27">2025-10-26</string>
-    <string name="_45_70_">$45.70</string>
     <string name="search_icon_description">Search Icon Description</string>
     <string name="search_food_expenses">Search Food Expenses...</string>
-
+    <string name="expense_tracker_login">Expense Tracker Login</string>
+    <string name="sign_in_to_manage_your_budget">Sign in to manage your budget</string>
+    <string name="email_address">Email Address</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login">Login</string>
+    <string name="don_t_have_an_account_register">Don\'t have an account? Register.</string>
+    <string name="create_account">Create Account</string>
+    <string name="full_name">Full Name</string>
+    <string name="password_min_6_characters">Password (min 6 characters)</string>
+    <string name="register">Register</string>
+    <string name="already_have_an_account_login_here">Already have an account? Login here.</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="enter_the_email_address_associated_with_your_account_and_we_ll_send_you_a_link_to_reset_your_password">Enter the email address associated with your account and we\'ll send you a link to reset your password.</string>
+    <string name="your_registered_email">Your Registered Email</string>
+    <string name="send_reset_link">Send Reset Link</string>
+    <string name="remembered_your_password_back_to_login">Remembered your password? Back to Login.</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="new_food_expense_details">New Food Expense Details</string>
+    <string name="category">Category</string>
+    <string name="enter_amount">Enter amount</string>
+    <string name="date">Date</string>
+    <string name="save_expense">Save Expense</string>
+    <string name="food_name_remark">Food Name / Remark</string>
+    <string name="enter_food_name_or_remark">Enter food name or remark</string>
+    <string name="amount">Amount</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="language">language</string>
+    <string name="backup_tasks">Backup task</string>
+    <string name="unsynced_tasks">Unsynced Tasks</string>
+    <string name="unsynced_tasks_summary">Unsynced Tasks Summary\n</string>
+    <string name="select_date">Select Date</string>
+    <string name="backup_in_progress">Backup in progress…</string>
+    <string name="backup_success_message">Backup successful. Saved to %1$s</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

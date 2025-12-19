@@ -1,23 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
 
-    <!-- Fragment container -->
-    <FrameLayout
-        android:id="@+id/fragment_container"
+    <!-- 1. The NavHostFragment hosts all your other fragments. -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="70dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        android:layout_above="@id/bottomNavigation"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/nav_graph" /> <!-- 2. Link to your navigation graph -->
 
-    <!-- Bottom navigation -->
+    <!-- 3. The BottomNavigationView remains the same. -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:menu="@menu/bottom_nav_menu"/>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/bottom_nav_menu" /> <!-- Make sure this menu exists -->
+
+</RelativeLayout>

@@ -2,85 +2,105 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cardExpenseItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
     app:cardCornerRadius="16dp"
-    app:cardElevation="4dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp"
     android:clickable="true"
     android:focusable="true"
-    app:rippleColor="#F0F0F0">
+    app:rippleColor="?attr/colorControlHighlight">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <ImageView
-            android:id="@+id/ivCategoryIcon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_food"
-            android:contentDescription="@string/expense_category_icon"
-            app:tint="#FF7043"
+        <!-- Circular Background for the Icon -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/icon_container"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="@id/tvExpenseTitle"
-            android:layout_marginEnd="12dp" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:cardBackgroundColor="#E3F2FD"> <!-- Example background color -->
 
+            <ImageView
+                android:id="@+id/ivCategoryIcon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/expense_category_icon"
+                tools:src="@drawable/ic_food"
+                tools:tint="#42A5F5"/> <!-- Example icon tint -->
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Expense Title -->
         <TextView
             android:id="@+id/tvExpenseTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/grocery_shopping"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#212121"
-            android:maxLines="1"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
             android:ellipsize="end"
-            app:layout_constraintStart_toEndOf="@id/ivCategoryIcon"
-            app:layout_constraintEnd_toStartOf="@id/tvExpenseAmount"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tvExpenseAmount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/_45_50"
-            android:textColor="#3F51B5"
-            android:textSize="20sp"
+            android:maxLines="1"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="17sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tvExpenseTitle"
-            app:layout_constraintBottom_toBottomOf="@id/tvExpenseTitle"
-            android:layout_marginStart="8dp" />
+            app:layout_constraintBottom_toTopOf="@+id/tvExpenseDate"
+            app:layout_constraintStart_toEndOf="@id/icon_container"
+            app:layout_constraintTop_toTopOf="@id/icon_container"
+            app:layout_constraintEnd_toStartOf="@id/tvExpenseAmount"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="Grocery Shopping" />
 
+        <!-- Expense Date -->
         <TextView
             android:id="@+id/tvExpenseDate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/_2025_10_27"
-            android:textColor="#757575"
+            android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
-            android:layout_marginTop="4dp"
+            app:layout_constraintBottom_toBottomOf="@id/icon_container"
             app:layout_constraintStart_toStartOf="@id/tvExpenseTitle"
+            app:layout_constraintTop_toBottomOf="@id/tvExpenseTitle"
             app:layout_constraintEnd_toEndOf="@id/tvExpenseTitle"
-            app:layout_constraintTop_toBottomOf="@id/tvExpenseTitle" />
+            tools:text="Oct 27, 2025" />
 
+        <!-- Expense Amount -->
+        <TextView
+            android:id="@+id/tvExpenseAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/green"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/ivDetailArrow"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="$45.50" />
+
+        <!-- Detail Arrow Icon -->
         <ImageView
             android:id="@+id/ivDetailArrow"
             android:layout_width="24dp"
             android:layout_height="24dp"
+            android:layout_marginStart="8dp"
             android:src="@drawable/ic_arrow_forward"
             android:contentDescription="@string/view_details"
-            app:tint="#BDBDBD"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvExpenseAmount"
+            app:tint="?attr/colorControlNormal"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginTop="8dp" />
-
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

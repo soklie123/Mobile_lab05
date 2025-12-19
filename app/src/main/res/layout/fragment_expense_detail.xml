@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5"
+    android:fitsSystemWindows="true"
+    tools:context=".fragments.ExpenseDetailFragment">
+
+    <!-- AppBar with Toolbar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FF7043"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbarDetail"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:titleTextColor="@android:color/white"/>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Scrollable content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Card with expense details -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:layout_marginBottom="16dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <!-- Expense Name -->
+                    <TextView
+                        android:id="@+id/tvDetailName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textColor="#212121"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Grocery Shopping"/>
+
+                    <!-- Amount -->
+                    <TextView
+                        android:id="@+id/tvDetailAmount"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="#3F51B5"
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        app:layout_constraintTop_toBottomOf="@id/tvDetailName"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:text="$45.70"/>
+
+                    <!-- Divider -->
+                    <View
+                        android:id="@+id/divider"
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:background="#EEEEEE"
+                        app:layout_constraintTop_toBottomOf="@id/tvDetailAmount"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Category -->
+                    <TextView
+                        android:id="@+id/tvCategoryLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Category:"
+                        android:textColor="#757575"
+                        android:textSize="16sp"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/divider"/>
+
+                    <TextView
+                        android:id="@+id/tvDetailCategory"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="#333333"
+                        android:textSize="16sp"
+                        app:layout_constraintStart_toEndOf="@id/tvCategoryLabel"
+                        app:layout_constraintTop_toTopOf="@id/tvCategoryLabel"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:text="Food"/>
+
+                    <!-- Date -->
+                    <TextView
+                        android:id="@+id/tvDateLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Date:"
+                        android:textColor="#757575"
+                        android:textSize="16sp"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvDetailCategory"/>
+
+                    <TextView
+                        android:id="@+id/tvDetailDate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="#333333"
+                        android:textSize="16sp"
+                        app:layout_constraintStart_toEndOf="@id/tvDateLabel"
+                        app:layout_constraintTop_toTopOf="@id/tvDateLabel"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:text="2025-10-26"/>
+
+                    <!-- Time -->
+                    <TextView
+                        android:id="@+id/tvTimeLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Time:"
+                        android:textColor="#757575"
+                        android:textSize="16sp"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvDetailDate"/>
+
+                    <TextView
+                        android:id="@+id/tvDetailTime"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="#333333"
+                        android:textSize="16sp"
+                        app:layout_constraintStart_toEndOf="@id/tvTimeLabel"
+                        app:layout_constraintTop_toTopOf="@id/tvTimeLabel"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:text="14:30"/>
+
+                    <!-- Description -->
+                    <TextView
+                        android:id="@+id/tvDescLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Notes:"
+                        android:textColor="#757575"
+                        android:textSize="16sp"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvDetailTime"/>
+
+                    <TextView
+                        android:id="@+id/tvDetailDesc"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#333333"
+                        android:textSize="16sp"
+                        app:layout_constraintTop_toBottomOf="@id/tvDescLabel"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:text="Detailed description of the expense goes here."/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Edit button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEditExpense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_expense"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                app:backgroundTint="#FF7043"
+                app:cornerRadius="12dp"/>
+
+            <!-- Delete button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDeleteExpense"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/delete_expense"
+                android:textAllCaps="false"
+                android:textColor="#D32F2F"
+                app:cornerRadius="12dp"
+                app:strokeColor="#D32F2F"
+                android:layout_marginTop="8dp"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
