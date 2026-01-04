@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="16dp">
+    android:paddingTop="16dp"
+    android:background="?attr/android:colorBackground"> <!-- CHANGE 1: Set theme-aware background -->
 
     <!-- The CardView is replaced by a TextInputLayout for a better user experience -->
     <com.google.android.material.textfield.TextInputLayout
@@ -37,7 +38,7 @@
             android:inputType="text"
             android:maxLines="1"
             android:textColor="?attr/colorOnSurface"
-            android:textColorHint="?attr/colorOnSurface" />
+            android:textColorHint="?attr/colorOnSurfaceVariant" /> <!-- Use colorOnSurfaceVariant for hints -->
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -52,9 +53,10 @@
         android:layout_marginTop="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        app:layout_constraintTop_toBottomOf="@id/search_input_layout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:textColor="?attr/colorOnBackground"
+    app:layout_constraintTop_toBottomOf="@id/search_input_layout"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- SwipeRefreshLayout wraps the RecyclerView -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

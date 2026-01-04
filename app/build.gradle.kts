@@ -39,6 +39,8 @@ android {
 dependencies {
 
     implementation(libs.appcompat)
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
     val room_version = "2.5.0"
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")
@@ -58,17 +60,18 @@ dependencies {
     implementation("androidx.camera:camera-camera2:$camerax_version")
     implementation("androidx.camera:camera-lifecycle:$camerax_version")
     implementation("androidx.camera:camera-view:$camerax_version")
-    // --- CORRECTED FIREBASE DEPENDENCIES ---
 
-    // 1. Import the Firebase Bill of Materials (BOM)
+    // Glide for image loading
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
+
     implementation(platform(libs.firebase.bom))
 
-    // 2. Declare the Firebase libraries you need WITHOUT versions.
-    // The BOM provides the versions.
-    implementation(libs.firebase.auth)    // <-- REMOVED the duplicate from above
+    implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.database)
-    implementation(libs.preference) // Optional: remove if you only use Firestore
+    implementation(libs.preference)
 
     implementation("androidx.navigation:navigation-fragment:2.7.7")
     implementation("androidx.navigation:navigation-ui:2.7.7")

@@ -1,6 +1,7 @@
 package com.example.expense_tracker_app.fragments;
 
-import android.os.Bundle;import android.view.LayoutInflater;
+import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -12,7 +13,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment; // Correct import
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -21,13 +22,13 @@ import com.example.expense_tracker_app.R;
 import com.example.expense_tracker_app.adapters.ExpenseAdapter;
 import com.example.expense_tracker_app.models.Expense;
 import com.example.expense_tracker_app.api.ExpenseApi;
-// We no longer need DateHelper here
-// import com.example.expense_tracker_app.utils.DateHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
+
+    public static final String RESULT_EXPENSE_REFRESH = "expense_refresh";
 
     private RecyclerView recyclerView;
     private ExpenseAdapter adapter;
@@ -43,7 +44,7 @@ public class HomeFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // SafeArea Insets
+        // Apply safe area insets
         ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
@@ -53,10 +54,8 @@ public class HomeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerExpenseList);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        // Initialize the adapter with the click listener
+        // Initialize adapter with click listener
         adapter = new ExpenseAdapter(new ArrayList<>(), expense -> {
-            // This is the implementation of the OnExpenseClickListener interface
-
             if (!isAdded()) return;
 
             Bundle args = new Bundle();
@@ -66,80 +65,59 @@ public class HomeFragment extends Fragment {
             args.putString("expense_description", expense.getDescription());
             args.putDouble("expense_amount", expense.getAmount());
             args.putString("expense_currency", expense.getCurrency());
-
-            // =========================================================
-            // *** THE FIX IS HERE ***
-            // Use the getDate() method which returns the "yyyy-MM-dd HH:mm:ss" string.
-            // This is the same string your other fragments are designed to work with.
+            args.putString("expense_receipt_image_url", expense.getReceiptImageUrl());
             args.putString("expense_date", expense.getDate());
-            // =========================================================
 
             NavController navController = NavHostFragment.findNavController(HomeFragment.this);
-
-            navController.navigate(
-                    R.id.action_homeFragment_to_expenseDetailFragment,
-                    args
-            );
+            navController.navigate(R.id.action_homeFragment_to_expenseDetailFragment, args);
         });
-
 
         recyclerView.setAdapter(adapter);
 
         swipeRefreshLayout = view.findViewById(R.id.swipeRefresh);
         swipeRefreshLayout.setOnRefreshListener(this::loadExpenses);
 
-        // Listen for results from other fragments (like after an edit/delete)
-        getParentFragmentManager().setFragmentResultListener("requestKey", this, (requestKey, bundle) -> {
-            if (bundle.getBoolean("refresh")) {
-                loadExpenses();
-            }
-        });
+        // Listen for results from other fragments
+        getParentFragmentManager().setFragmentResultListener(
+                RESULT_EXPENSE_REFRESH,
+                getViewLifecycleOwner(),
+                (requestKey, bundle) -> {
+                    if (bundle.getBoolean("refresh", false)) {
+                        loadExpenses();
+                    }
+                }
+        );
+
+        // Initial load
+        loadExpenses();
 
         return view;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Load expenses when the fragment becomes visible
-        loadExpenses();
-    }
-
-    public void loadExpenses() {
-        if (swipeRefreshLayout != null) {
-            swipeRefreshLayout.setRefreshing(true);
-        }
+    private void loadExpenses() {
+        swipeRefreshLayout.setRefreshing(true);
 
         ExpenseApi expenseApi = new ExpenseApi();
         expenseApi.getAllExpenses(new ExpenseApi.AllExpensesCallback() {
             @Override
             public void onSuccess(List<Expense> expenses) {
-                // Ensure the fragment is still attached to an activity
-                if (!isAdded() || getContext() == null) return;
+                if (!isAdded()) return;
 
                 requireActivity().runOnUiThread(() -> {
-                    if (swipeRefreshLayout != null) {
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
-                    if (adapter != null) {
-                        adapter.setExpenseList(expenses);
-                    }
+                    swipeRefreshLayout.setRefreshing(false);
+                    adapter.setExpenseList(expenses); // <-- update adapter data
                 });
             }
 
             @Override
             public void onFailure(String errorMessage) {
-                if (!isAdded() || getContext() == null) return;
+                if (!isAdded()) return;
 
                 requireActivity().runOnUiThread(() -> {
-                    if (swipeRefreshLayout != null) {
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
-                    Toast.makeText(
-                            requireContext(),
-                            "Load failed: " + errorMessage,
-                            Toast.LENGTH_LONG
-                    ).show();
+                    swipeRefreshLayout.setRefreshing(false);
+                    Toast.makeText(requireContext(),
+                            "Failed to load expenses: " + errorMessage,
+                            Toast.LENGTH_LONG).show();
                 });
             }
         });

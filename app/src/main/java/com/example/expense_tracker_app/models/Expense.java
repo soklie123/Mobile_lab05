@@ -16,9 +16,9 @@ public class Expense {
     @PrimaryKey(autoGenerate = true)
     private int localId;
 
-    @DocumentId // This is a Firestore annotation, you can keep or remove it
+    @DocumentId
     @SerializedName("id")
-    private String id; // This is the Server/API ID
+    private String id;
 
     private double amount;
     private String currency;
@@ -28,10 +28,14 @@ public class Expense {
     private String description;
     private String date;
 
-    @ServerTimestamp // This is a Firestore annotation, it won't work with a standard API
+    @ServerTimestamp
     private Date createdDate;
 
     private boolean isSynced;
+
+    // NEW: Add receipt image URL field
+    @SerializedName("receiptImageUrl")
+    private String receiptImageUrl;
 
     @Ignore
     public Expense(double amount,
@@ -52,11 +56,9 @@ public class Expense {
         this.isSynced = false;
     }
 
-
     public Expense() {
-        this.isSynced = false; // Default to not synced
+        this.isSynced = false;
     }
-
 
     // --- GETTERS & SETTERS ---
     public boolean isSynced() {
@@ -67,8 +69,6 @@ public class Expense {
         isSynced = synced;
     }
 
-
-    // (A new getter/setter for the localId is required)
     public int getLocalId() {
         return localId;
     }
@@ -77,7 +77,6 @@ public class Expense {
         this.localId = localId;
     }
 
-    // --- All other Getters and Setters remain the same ---
     public String getId() { return id; }
     public double getAmount() { return amount; }
     public String getCurrency() { return currency; }
@@ -87,6 +86,12 @@ public class Expense {
     public Date getCreatedDate() { return createdDate; }
     public String getDescription() { return description; }
     public String getDate() { return date; }
+
+    // NEW: Getter and Setter for receiptImageUrl
+    public String getReceiptImageUrl() { return receiptImageUrl; }
+    public void setReceiptImageUrl(String receiptImageUrl) {
+        this.receiptImageUrl = receiptImageUrl;
+    }
 
     public void setId(String id) { this.id = id; }
     public void setAmount(double amount) { this.amount = amount; }
@@ -98,4 +103,3 @@ public class Expense {
     public void setDescription(String description) { this.description = description; }
     public void setDate(String date) { this.date = date; }
 }
-

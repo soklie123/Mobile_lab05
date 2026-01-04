@@ -1,73 +1,74 @@
 package com.example.expense_tracker_app.fragments;
 
-import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.bumptech.glide.Glide;
+import com.example.expense_tracker_app.R;
 import com.example.expense_tracker_app.api.ExpenseApi;
 import com.example.expense_tracker_app.databinding.FragmentAddExpenseBinding;
-import com.example.expense_tracker_app.models.Category;
 import com.example.expense_tracker_app.models.Expense;
 import com.example.expense_tracker_app.utils.CategoryViewModel;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.android.material.datepicker.MaterialDatePicker;
 
-import java.text.ParseException;
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.Locale;
 
 public class AddExpenseFragment extends Fragment {
 
     private FragmentAddExpenseBinding binding;
-    private FirebaseAuth mAuth;
-
-    private boolean isEditMode = false;
-    private String existingExpenseId = null;
-
     private CategoryViewModel categoryViewModel;
-    private ArrayAdapter<String> categoryAdapter;
-    private final List<String> categoryNames = new ArrayList<>();
 
-    // Default categories to insert if Room is empty
-    private final List<String> originalCategories = Arrays.asList(
-            "Groceries",
-            "Restaurants"
-    );
+    // Image selection variables
+    private Uri selectedImageUri;
+    private String currentPhotoPath;
 
-    private final Calendar selectedDateTime = Calendar.getInstance();
-    private final SimpleDateFormat storageFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+    // Activity result launchers
+    private ActivityResultLauncher<Intent> galleryLauncher;
+    private ActivityResultLauncher<Intent> cameraLauncher;
+    private ActivityResultLauncher<String> cameraPermissionLauncher;
+    private ActivityResultLauncher<String> storagePermissionLauncher;
 
-    public interface OnExpenseAddedListener {
-        void onExpenseAdded();
-    }
+    private String selectedDate;
+    private boolean isEditMode = false;
 
-    private OnExpenseAddedListener listener;
-
-    public void setOnExpenseAddedListener(OnExpenseAddedListener listener) {
-        this.listener = listener;
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setupActivityResultLaunchers();
     }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentAddExpenseBinding.inflate(inflater, container, false);
-        mAuth = FirebaseAuth.getInstance();
         return binding.getRoot();
     }
 
@@ -75,296 +76,345 @@ public class AddExpenseFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        NavController navController = Navigation.findNavController(view);
+
+        // Initialize ViewModel
         categoryViewModel = new ViewModelProvider(requireActivity()).get(CategoryViewModel.class);
 
-        insertDefaultCategoriesIfNeeded();
-        setupToolbar();
-        setupCategoryDropdown();
+        // Setup toolbar
+        binding.addToolbar.setTitle("Add Expense");
+        binding.addToolbar.setNavigationOnClickListener(v -> navController.popBackStack());
+
+        // Setup category spinner
+        setupCategorySpinner();
+
+        // Setup date picker
         setupDatePicker();
 
-        binding.btnAddCategory.setOnClickListener(v -> showAddCategoryDialog());
-        binding.btnSaveExpense.setOnClickListener(v -> saveOrUpdateExpense());
+        // Setup image selection
+        setupImageSelection();
 
-        Bundle args = getArguments();
-        if (args != null && args.getBoolean("isEditMode", false)) {
-            isEditMode = true;
-            existingExpenseId = args.getString("expense_id");
-            populateFormForEdit(args);
-        } else {
-            isEditMode = false;
-            selectedDateTime.setTime(new Date());
-            updateDateDisplay();
-        }
+        // Setup save button
+        binding.btnSaveExpense.setOnClickListener(v -> saveExpense(navController));
+
+        // Check if edit mode
+        checkEditMode();
     }
 
-    // -------------------- CATEGORY --------------------
-
-    private void insertDefaultCategoriesIfNeeded() {
-        categoryViewModel.getAllCategories().observe(getViewLifecycleOwner(), categories -> {
-            if (categories == null || categories.isEmpty()) {
-                for (String name : originalCategories) {
-                    categoryViewModel.insert(new Category(name));
-                }
-            }
-        });
-    }
-
-    // Setup Category Drop Drown
-    // Setup Category Drop Drown
-    private void setupCategoryDropdown() {
-        // The adapter will now be created and set inside the LiveData observer.
-        // This ensures it's fresh after a configuration change.
-
-        categoryViewModel.getAllCategories().observe(getViewLifecycleOwner(), categoriesFromDb -> {
-            Set<String> uniqueNames = new LinkedHashSet<>();
-
-            // Always include defaults
-            uniqueNames.addAll(originalCategories);
-
-            // Include all Room categories
-            if (categoriesFromDb != null) {
-                for (Category c : categoriesFromDb) {
-                    if (!TextUtils.isEmpty(c.getName())) {
-                        uniqueNames.add(c.getName());
+    private void setupActivityResultLaunchers() {
+        // Gallery launcher
+        galleryLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == requireActivity().RESULT_OK
+                            && result.getData() != null) {
+                        selectedImageUri = result.getData().getData();
+                        displayImagePreview(selectedImageUri);
                     }
                 }
-            }
+        );
 
-            // Create a new list for the adapter from the unique names.
-            List<String> updatedCategoryNames = new ArrayList<>(uniqueNames);
-
-            // Create a new ArrayAdapter with the fresh data.
-            ArrayAdapter<String> newAdapter = new ArrayAdapter<>(
-                    requireContext(),
-                    android.R.layout.simple_dropdown_item_1line,
-                    updatedCategoryNames
-            );
-
-            // Set the new adapter on the AutoCompleteTextView.
-            binding.spinnerCategory.setAdapter(newAdapter);
-
-            // Keep the fragment's own list in sync if you use it elsewhere (e.g., in showAddCategoryDialog)
-            this.categoryNames.clear();
-            this.categoryNames.addAll(updatedCategoryNames);
-            this.categoryAdapter = newAdapter;
-        });
-    }
-
-
-
-    private void showAddCategoryDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Add New Category");
-
-        final EditText input = new EditText(requireContext());
-        input.setHint("Enter category name");
-        builder.setView(input);
-
-        builder.setPositiveButton("Save", (dialog, which) -> {
-            String newCategoryName = input.getText().toString().trim();
-
-            if (TextUtils.isEmpty(newCategoryName)) return;
-
-            // Check if already exists in dropdown
-            for (String existingName : categoryNames) {
-                if (existingName.equalsIgnoreCase(newCategoryName)) {
-                    Toast.makeText(getContext(), "Category already exists", Toast.LENGTH_SHORT).show();
-                    binding.spinnerCategory.setText(existingName, false);
-                    return;
+        // Camera launcher
+        cameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == requireActivity().RESULT_OK) {
+                        File photoFile = new File(currentPhotoPath);
+                        selectedImageUri = Uri.fromFile(photoFile);
+                        displayImagePreview(selectedImageUri);
+                    }
                 }
-            }
+        );
 
-            // Insert into Room if unique
-            Category newCategory = new Category(newCategoryName);
-            categoryViewModel.insert(newCategory);
-            binding.spinnerCategory.setText(newCategoryName, false); // select immediately
-        });
+        // Camera permission launcher
+        cameraPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        openCamera();
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Camera permission is required to take photos",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
 
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-        builder.show();
+        // Storage permission launcher (for Android 13+)
+        storagePermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        openGallery();
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Storage permission is required to access photos",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
     }
 
+    private void setupCategorySpinner() {
+        categoryViewModel.getAllCategories().observe(getViewLifecycleOwner(), categories -> {
+            if (categories != null && !categories.isEmpty()) {
+                String[] categoryNames = new String[categories.size()];
+                for (int i = 0; i < categories.size(); i++) {
+                    categoryNames[i] = categories.get(i).getName();
+                }
 
-    // -------------------- DATE & TIME --------------------
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                        requireContext(),
+                        android.R.layout.simple_dropdown_item_1line,
+                        categoryNames
+                );
+                binding.spinnerCategory.setAdapter(adapter);
+            }
+        });
+
+        // Add category button
+        binding.btnAddCategory.setOnClickListener(v -> {
+            Navigation.findNavController(requireView())
+                    .navigate(R.id.action_addExpenseFragment_to_addCategoryFragment);
+        });
+    }
 
     private void setupDatePicker() {
-        binding.editDate.setOnClickListener(v -> {
-            int year = selectedDateTime.get(Calendar.YEAR);
-            int month = selectedDateTime.get(Calendar.MONTH);
-            int day = selectedDateTime.get(Calendar.DAY_OF_MONTH);
+        binding.layoutDate.setEndIconOnClickListener(v -> showDatePicker());
+        binding.editDate.setOnClickListener(v -> showDatePicker());
+    }
 
-            new DatePickerDialog(requireContext(), (view, selectedYear, selectedMonth, selectedDay) -> {
-                selectedDateTime.set(Calendar.YEAR, selectedYear);
-                selectedDateTime.set(Calendar.MONTH, selectedMonth);
-                selectedDateTime.set(Calendar.DAY_OF_MONTH, selectedDay);
-                showTimePicker();
-            }, year, month, day).show();
+    private void showDatePicker() {
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select date")
+                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .build();
+
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            selectedDate = sdf.format(new Date(selection));
+            binding.editDate.setText(selectedDate);
         });
+
+        datePicker.show(getParentFragmentManager(), "DATE_PICKER");
     }
 
-    private void showTimePicker() {
-        int hour = selectedDateTime.get(Calendar.HOUR_OF_DAY);
-        int minute = selectedDateTime.get(Calendar.MINUTE);
+    private void setupImageSelection() {
+        // Pick from gallery
+        binding.btnPickFromGallery.setOnClickListener(v -> checkStoragePermissionAndOpenGallery());
 
-        new TimePickerDialog(requireContext(), (view, hourOfDay, minuteOfHour) -> {
-            selectedDateTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
-            selectedDateTime.set(Calendar.MINUTE, minuteOfHour);
-            selectedDateTime.set(Calendar.SECOND, 0);
-            updateDateDisplay();
-        }, hour, minute, true).show();
+        // Take photo with camera
+        binding.btnTakePhoto.setOnClickListener(v -> checkCameraPermissionAndOpen());
+
+        // Remove image
+        binding.btnRemoveImage.setOnClickListener(v -> removeImage());
     }
 
-    private void updateDateDisplay() {
-        binding.editDate.setText(formatWithOrdinal(selectedDateTime.getTime()));
-    }
-
-    private String formatWithOrdinal(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        int day = cal.get(Calendar.DAY_OF_MONTH);
-        String daySuffix = getDayOfMonthSuffix(day);
-        SimpleDateFormat displayFormat = new SimpleDateFormat(" MMM yyyy, HH:mm", Locale.getDefault());
-        return day + daySuffix + displayFormat.format(date);
-    }
-
-    private String getDayOfMonthSuffix(final int n) {
-        if (n >= 11 && n <= 13) return "th";
-        switch (n % 10) {
-            case 1: return "st";
-            case 2: return "nd";
-            case 3: return "rd";
-            default: return "th";
-        }
-    }
-
-    // -------------------- TOOLBAR --------------------
-
-    private void setupToolbar() {
-        binding.addToolbar.setNavigationOnClickListener(v -> {
-            if (isAdded()) Navigation.findNavController(requireView()).popBackStack();
-        });
-    }
-
-    // -------------------- FORM --------------------
-
-    private void populateFormForEdit(Bundle args) {
-        binding.addToolbar.setTitle("Edit Expense");
-        binding.btnSaveExpense.setText("Update Expense");
-
-        String remark = args.getString("expense_remark");
-        double amount = args.getDouble("expense_amount");
-        String description = args.getString("expense_description");
-        String category = args.getString("expense_category");
-        String dateString = args.getString("expense_date");
-
-        binding.editFoodName.setText(remark);
-        binding.editAmount.setText(String.format(Locale.US, "%.2f", amount));
-        binding.editDescription.setText(description);
-        binding.spinnerCategory.setText(category, false);
-
-        if (dateString != null && !dateString.isEmpty()) {
-            try {
-                Date storedDate = storageFormat.parse(dateString);
-                selectedDateTime.setTime(Objects.requireNonNull(storedDate));
-            } catch (ParseException e) {
-                Log.e("AddExpenseFragment", "Failed to parse date", e);
-                selectedDateTime.setTime(new Date());
+    private void checkStoragePermissionAndOpenGallery() {
+        // For Android 13+ (API 33+), we need READ_MEDIA_IMAGES
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
+                openGallery();
+            } else {
+                storagePermissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES);
+            }
+        } else {
+            // For older Android versions
+            if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                openGallery();
+            } else {
+                storagePermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
             }
         }
-        updateDateDisplay();
     }
 
-    private void saveOrUpdateExpense() {
-        String remark = Objects.requireNonNull(binding.editFoodName.getText()).toString().trim();
-        String amountStr = Objects.requireNonNull(binding.editAmount.getText()).toString().trim();
-        String category = binding.spinnerCategory.getText().toString().trim();
-        String description = Objects.requireNonNull(binding.editDescription.getText()).toString().trim();
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        galleryLauncher.launch(intent);
+    }
 
-        if (TextUtils.isEmpty(remark) || TextUtils.isEmpty(amountStr) || TextUtils.isEmpty(category)) {
-            Toast.makeText(getContext(), "Remark, Amount, and Category are required", Toast.LENGTH_SHORT).show();
+    private void checkCameraPermissionAndOpen() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            openCamera();
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    private void openCamera() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        if (takePictureIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                Toast.makeText(requireContext(), "Error creating image file",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(requireContext(),
+                        requireContext().getPackageName() + ".fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                cameraLauncher.launch(takePictureIntent);
+            }
+        } else {
+            Toast.makeText(requireContext(), "No camera app found",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
+                Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,
+                ".jpg",
+                storageDir
+        );
+
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    private void displayImagePreview(Uri imageUri) {
+        binding.cardImagePreview.setVisibility(View.VISIBLE);
+
+        Glide.with(this)
+                .load(imageUri)
+                .centerCrop()
+                .into(binding.imagePreview);
+    }
+
+    private void removeImage() {
+        selectedImageUri = null;
+        currentPhotoPath = null;
+        binding.cardImagePreview.setVisibility(View.GONE);
+        binding.imagePreview.setImageDrawable(null);
+    }
+
+    private void checkEditMode() {
+        Bundle args = getArguments();
+        if (args != null) {
+            isEditMode = args.getBoolean("isEditMode", false);
+            if (isEditMode) {
+                binding.addToolbar.setTitle("Edit Expense");
+                // Load existing data...
+                String receiptUrl = args.getString("expense_receipt_image_url");
+                if (!TextUtils.isEmpty(receiptUrl)) {
+                    selectedImageUri = Uri.parse(receiptUrl);
+                    displayImagePreview(selectedImageUri);
+                }
+            }
+        }
+    }
+
+    private void saveExpense(NavController navController) {
+        // Get input values
+        String foodName = binding.editFoodName.getText().toString().trim();
+        String amountStr = binding.editAmount.getText().toString().trim();
+        String category = binding.spinnerCategory.getText().toString().trim();
+        String description = binding.editDescription.getText().toString().trim();
+
+        // Validation
+        if (TextUtils.isEmpty(foodName)) {
+            binding.editFoodName.setError("Required");
+            binding.editFoodName.requestFocus();
             return;
         }
 
-        binding.layoutAmount.setError(null);
+        if (TextUtils.isEmpty(amountStr)) {
+            binding.editAmount.setError("Required");
+            binding.editAmount.requestFocus();
+            return;
+        }
+
+        if (TextUtils.isEmpty(category)) {
+            binding.spinnerCategory.setError("Required");
+            binding.spinnerCategory.requestFocus();
+            return;
+        }
+
+        if (TextUtils.isEmpty(selectedDate)) {
+            binding.editDate.setError("Required");
+            binding.editDate.requestFocus();
+            return;
+        }
+
         double amount;
         try {
             amount = Double.parseDouble(amountStr);
         } catch (NumberFormatException e) {
-            binding.layoutAmount.setError("Invalid number");
+            binding.editAmount.setError("Invalid amount");
+            binding.editAmount.requestFocus();
             return;
         }
 
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) {
-            Toast.makeText(getContext(), "Authentication error. Please re-login.", Toast.LENGTH_SHORT).show();
-            return;
+        // Create expense object
+        Expense expense = new Expense(
+                amount,
+                "USD",
+                category,
+                foodName,
+                description,
+                selectedDate + " 00:00:00", // Add time format
+                "user_id" // Replace with actual user ID from SharedPreferences
+        );
+
+        // Set receipt image URL if available
+        if (selectedImageUri != null) {
+            expense.setReceiptImageUrl(selectedImageUri.toString());
         }
 
-        String dateToStore = storageFormat.format(selectedDateTime.getTime());
-
-        Expense expense = new Expense();
-        expense.setAmount(amount);
-        expense.setCategory(category);
-        expense.setRemark(remark);
-        expense.setDescription(description);
-        expense.setDate(dateToStore);
-        expense.setCreatedBy(user.getUid());
-        expense.setCurrency("USD");
-
-        binding.btnSaveExpense.setEnabled(false);
-        ExpenseApi expenseApi = new ExpenseApi();
-
-        if (isEditMode) {
-            expenseApi.updateExpense(existingExpenseId, expense, createApiCallback(true));
-        } else {
-            expenseApi.createExpense(expense, createApiCallback(false));
-        }
+        // Save to API
+        saveExpenseToApi(expense, navController);
     }
 
-    private ExpenseApi.ApiCallback createApiCallback(boolean isUpdate) {
-        return new ExpenseApi.ApiCallback() {
+    private void saveExpenseToApi(Expense expense, NavController navController) {
+        // Show loading
+        binding.btnSaveExpense.setEnabled(false);
+        binding.btnSaveExpense.setText("Saving...");
+
+        ExpenseApi expenseApi = new ExpenseApi();
+        expenseApi.createExpense(expense, new ExpenseApi.ApiCallback() {
             @Override
             public void onSuccess() {
                 if (!isAdded()) return;
-                requireActivity().runOnUiThread(() -> {
-                    String message = isUpdate ? "Expense updated successfully" : "Expense added successfully";
-                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
 
-                    if (isUpdate) {
-                        Bundle result = new Bundle();
-                        result.putBoolean("refresh", true);
-                        getParentFragmentManager().setFragmentResult("requestKey", result);
-                        Navigation.findNavController(requireView()).popBackStack();
-                    } else {
-                        clearForm();
-                        binding.btnSaveExpense.setEnabled(true);
-                        if (listener != null) listener.onExpenseAdded();
-                    }
-                });
+                // Notify HomeFragment to refresh
+                Bundle result = new Bundle();
+                result.putBoolean("refresh", true);
+                getParentFragmentManager().setFragmentResult("requestKey", result);
+
+                Toast.makeText(requireContext(), "Expense saved successfully!",
+                        Toast.LENGTH_SHORT).show();
+
+                navController.popBackStack();
             }
 
             @Override
             public void onFailure(String errorMessage) {
                 if (!isAdded()) return;
-                requireActivity().runOnUiThread(() -> {
-                    String message = (isUpdate ? "Update" : "Save") + " failed: " + errorMessage;
-                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-                    binding.btnSaveExpense.setEnabled(true);
-                });
+
+                Toast.makeText(requireContext(), "Failed to save: " + errorMessage,
+                        Toast.LENGTH_LONG).show();
+
+                // Re-enable button
+                binding.btnSaveExpense.setEnabled(true);
+                binding.btnSaveExpense.setText("Save Expense");
             }
-        };
+        });
     }
-
-    private void clearForm() {
-        binding.editFoodName.setText("");
-        binding.editAmount.setText("");
-        binding.editDescription.setText("");
-        binding.spinnerCategory.setText("", false);
-        binding.layoutAmount.setError(null);
-        selectedDateTime.setTime(new Date());
-        updateDateDisplay();
-    }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();

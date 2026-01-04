@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.bumptech.glide.Glide;
 import com.example.expense_tracker_app.R;
 import com.example.expense_tracker_app.databinding.FragmentExpenseDetailBinding;
 import com.example.expense_tracker_app.api.ExpenseApi;
@@ -60,7 +61,8 @@ public class ExpenseDetailFragment extends Fragment {
         String description = args.getString("expense_description");
         double amount = args.getDouble("expense_amount", 0.0);
         String currency = args.getString("expense_currency");
-        String dateTimeStr = args.getString("expense_date"); // Expect format "yyyy-MM-dd HH:mm:ss"
+        String dateTimeStr = args.getString("expense_date");
+        String receiptImageUrl = args.getString("expense_receipt_image_url"); // NEW: Get receipt image URL
 
         // Split date and time
         String dateOnly = "N/A";
@@ -82,6 +84,9 @@ public class ExpenseDetailFragment extends Fragment {
         binding.tvDetailTime.setText(timeOnly);
         binding.tvDetailCategory.setText(!TextUtils.isEmpty(category) ? category : "N/A");
 
+        // NEW: Display receipt image if available
+        displayReceiptImage(receiptImageUrl);
+
         // Edit button
         binding.btnEditExpense.setOnClickListener(v -> {
             Bundle editArgs = new Bundle();
@@ -93,6 +98,7 @@ public class ExpenseDetailFragment extends Fragment {
             editArgs.putDouble("expense_amount", amount);
             editArgs.putString("expense_currency", currency);
             editArgs.putString("expense_date", dateTimeStr);
+            editArgs.putString("expense_receipt_image_url", receiptImageUrl); // Pass receipt URL
 
             navController.navigate(
                     R.id.action_expenseDetailFragment_to_addExpenseFragment,
@@ -102,6 +108,22 @@ public class ExpenseDetailFragment extends Fragment {
 
         // Delete button
         binding.btnDeleteExpense.setOnClickListener(v -> showDeleteConfirmationDialog(navController));
+    }
+
+    // NEW: Method to display receipt image
+    private void displayReceiptImage(String receiptImageUrl) {
+        if (!TextUtils.isEmpty(receiptImageUrl)) {
+            binding.cardReceipt.setVisibility(View.VISIBLE);
+
+            Glide.with(this)
+                    .load(receiptImageUrl)
+                    .centerCrop()
+                    .placeholder(R.drawable.ic_image) // Add placeholder image
+                    .error(R.drawable.ic_image) // Add error image
+                    .into(binding.imgReceipt);
+        } else {
+            binding.cardReceipt.setVisibility(View.GONE);
+        }
     }
 
     private void showDeleteConfirmationDialog(NavController navController) {
@@ -163,6 +185,6 @@ public class ExpenseDetailFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null; // prevent memory leak
+        binding = null;
     }
 }
