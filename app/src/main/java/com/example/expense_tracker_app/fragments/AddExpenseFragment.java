@@ -4,10 +4,12 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +33,7 @@ import com.example.expense_tracker_app.api.ExpenseApi;
 import com.example.expense_tracker_app.databinding.FragmentAddExpenseBinding;
 import com.example.expense_tracker_app.models.Expense;
 import com.example.expense_tracker_app.utils.CategoryViewModel;
+import com.example.expense_tracker_app.utils.NotificationHelper;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
 import java.io.File;
@@ -54,6 +57,8 @@ public class AddExpenseFragment extends Fragment {
     private ActivityResultLauncher<String> cameraPermissionLauncher;
     private ActivityResultLauncher<String> storagePermissionLauncher;
 
+    private ActivityResultLauncher<String> notificationPermissionLauncher;
+
     private String selectedDate;
     private boolean isEditMode = false;
 
@@ -61,6 +66,18 @@ public class AddExpenseFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActivityResultLaunchers();
+
+        // Initialize the new launcher
+        notificationPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (!isGranted) {
+                        Toast.makeText(requireContext(),
+                                "You won't receive budget warnings without notification permission.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
     }
 
     @Nullable
@@ -99,6 +116,18 @@ public class AddExpenseFragment extends Fragment {
 
         // Check if edit mode
         checkEditMode();
+
+        // Request permission when the fragment is created
+        requestNotificationPermission();
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
     }
 
     private void setupActivityResultLaunchers() {
@@ -390,6 +419,18 @@ public class AddExpenseFragment extends Fragment {
             @Override
             public void onSuccess() {
                 if (!isAdded()) return;
+
+                Log.d("NotificationDebug", "API call successful. Checking expense amount.");
+                Log.d("NotificationDebug", "Expense Amount: " + expense.getAmount() + " | Remark: " + expense.getRemark());
+
+                // Check budget and show notification
+                if (expense.getAmount() > 100) {
+                    Log.d("NotificationDebug", "Amount > 100. Attempting to show notification.");
+
+                    NotificationHelper notificationHelper = new NotificationHelper(requireContext());
+                    notificationHelper.showBudgetWarningNotification(expense.getRemark(), expense.getAmount());
+                }
+
 
                 // Notify HomeFragment to refresh
                 Bundle result = new Bundle();
